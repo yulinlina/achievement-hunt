@@ -1,0 +1,82 @@
+name: Achievement Hunt
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+env:
+  AUTHOR_NAME: yulinlina
+  AUTHOR_EMAIL: 77262518+yulinlina@users.noreply.github.com
+  COAUTHOR_TRAILER: "Co-authored-by: The Octocat <583231+octocat@users.noreply.github.com>"
+
+jobs:
+  hunt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure git identity
+        run: |
+          git config user.name "$AUTHOR_NAME"
+          git config user.email "$AUTHOR_EMAIL"
+
+      # ── Quickdraw: open + close an issue in the same run (< 5 min) ──
+      - name: "🎯 Quickdraw"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          STAMP=$(date +%s)
+          NUM=$(gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "Quickdraw target ${STAMP}" \
+            --body "Opened and closed within 5 minutes — Quickdraw achievement." \
+            --json number --jq '.number')
+          gh issue close "$NUM" --repo "$GITHUB_REPOSITORY" --reason "not planned"
+          echo "✅ Quickdraw: issue #${NUM} opened + closed"
+
+      # ── YOLO: merge a PR with no review ──
+      - name: "🤠 YOLO"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          STAMP=$(date +%s)
+          BR="yolo-${STAMP}"
+          git checkout -b "$BR"
+          echo "yolo ${STAMP}" >> hunt.log
+          git add hunt.log
+          git commit -m "chore: YOLO merge target (${STAMP})"
+          git push -u origin "$BR"
+          PR=$(gh pr create --repo "$GITHUB_REPOSITORY" --head "$BR" --base main \
+            --title "YOLO: merge without review (${STAMP})" \
+            --body "Merging with no review — YOLO achievement." \
+            --json number --jq '.number')
+          gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --merge --admin
+          echo "✅ YOLO: PR #${PR} merged without review"
+
+      # ── Pair Extraordinaire: merge a co-authored PR ──
+      - name: "👯 Pair Extraordinaire"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          git checkout main
+          git pull --ff-only origin main
+          STAMP=$(date +%s)
+          BR="pair-${STAMP}"
+          git checkout -b "$BR"
+          echo "pair ${STAMP}" >> pair.log
+          git add pair.log
+          git commit -m "feat: pair-programming session (${STAMP})" -m "$COAUTHOR_TRAILER"
+          git push -u origin "$BR"
+          PR=$(gh pr create --repo "$GITHUB_REPOSITORY" --head "$BR" --base main \
+            --title "Pair Extraordinaire: co-authored change (${STAMP})" \
+            --body "Co-authored commit — Pair Extraordinaire achievement." \
+            --json number --jq '.number')
+          gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --merge --admin
+          echo "✅ Pair Extraordinaire: PR #${PR} merged (co-authored)"
