@@ -28,7 +28,7 @@ jobs:
       # ── Quickdraw: open + close an issue in the same run (< 5 min) ──
       - name: "🎯 Quickdraw"
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           set -e
           STAMP=$(date +%s)
@@ -42,7 +42,7 @@ jobs:
       # ── YOLO: merge a PR with no review ──
       - name: "🤠 YOLO"
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           set -e
           STAMP=$(date +%s)
@@ -61,7 +61,7 @@ jobs:
       # ── Pair Extraordinaire: merge a co-authored PR ──
       - name: "👯 Pair Extraordinaire"
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           set -e
           git checkout main
