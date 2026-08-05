@@ -32,10 +32,10 @@ jobs:
         run: |
           set -e
           STAMP=$(date +%s)
-          NUM=$(gh issue create --repo "$GITHUB_REPOSITORY" \
+          URL=$(gh issue create --repo "$GITHUB_REPOSITORY" \
             --title "Quickdraw target ${STAMP}" \
-            --body "Opened and closed within 5 minutes — Quickdraw achievement." \
-            --json number --jq '.number')
+            --body "Opened and closed within 5 minutes — Quickdraw achievement.")
+          NUM=$(echo "$URL" | grep -oE '[0-9]+$')
           gh issue close "$NUM" --repo "$GITHUB_REPOSITORY" --reason "not planned"
           echo "✅ Quickdraw: issue #${NUM} opened + closed"
 
@@ -54,8 +54,7 @@ jobs:
           git push -u origin "$BR"
           PR=$(gh pr create --repo "$GITHUB_REPOSITORY" --head "$BR" --base main \
             --title "YOLO: merge without review (${STAMP})" \
-            --body "Merging with no review — YOLO achievement." \
-            --json number --jq '.number')
+            --body "Merging with no review — YOLO achievement." | grep -oE '[0-9]+$')
           gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --merge --admin
           echo "✅ YOLO: PR #${PR} merged without review"
 
@@ -76,7 +75,6 @@ jobs:
           git push -u origin "$BR"
           PR=$(gh pr create --repo "$GITHUB_REPOSITORY" --head "$BR" --base main \
             --title "Pair Extraordinaire: co-authored change (${STAMP})" \
-            --body "Co-authored commit — Pair Extraordinaire achievement." \
-            --json number --jq '.number')
+            --body "Co-authored commit — Pair Extraordinaire achievement." | grep -oE '[0-9]+$')
           gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --merge --admin
           echo "✅ Pair Extraordinaire: PR #${PR} merged (co-authored)"
